@@ -70,17 +70,17 @@ namespace Eigen {
     Find the eigen-decomposition of the covariance matrix
     and then store it for sampling from a multi-variate normal 
   */
-  template<typename Scalar, int Size>
+  template<typename Scalar>
     class EigenMultivariateNormal
   {
-    Matrix<Scalar,Size,Size> _covar;
-    Matrix<Scalar,Size,Size> _transform;
-    Matrix< Scalar, Size, 1> _mean;
+    Matrix<Scalar,Dynamic,Dynamic> _covar;
+    Matrix<Scalar,Dynamic,Dynamic> _transform;
+    Matrix< Scalar, Dynamic, 1> _mean;
     internal::scalar_normal_dist_op<Scalar> randN; // Gaussian functor
     bool _use_cholesky;
 
   public:
-  EigenMultivariateNormal(const Matrix<Scalar,Size,1>& mean,const Matrix<Scalar,Size,Size>& covar,
+  EigenMultivariateNormal(const Matrix<Scalar,Dynamic,1>& mean,const Matrix<Scalar,Dynamic,Dynamic>& covar,
 			  const bool use_cholesky=false)
       :_use_cholesky(use_cholesky)
       {
@@ -88,8 +88,8 @@ namespace Eigen {
 	setCovar(covar);
       }
 
-    void setMean(const Matrix<Scalar,Size,1>& mean) { _mean = mean; }
-    void setCovar(const Matrix<Scalar,Size,Size>& covar)
+    void setMean(const Matrix<Scalar,Dynamic,1>& mean) { _mean = mean; }
+    void setCovar(const Matrix<Scalar,Dynamic,Dynamic>& covar)
     {
       _covar = covar;
       
@@ -99,7 +99,7 @@ namespace Eigen {
       
       if (_use_cholesky)
 	{
-	  Eigen::LLT<Eigen::Matrix<Scalar,Size,Size> > cholSolver(_covar);
+	  Eigen::LLT<Eigen::Matrix<Scalar,Dynamic,Dynamic> > cholSolver(_covar);
 	  // We can only use the cholesky decomposition if 
 	  // the covariance matrix is symmetric, pos-definite.
 	  // But a covariance matrix might be pos-semi-definite.
@@ -116,16 +116,16 @@ namespace Eigen {
 	}
       else
 	{
-	  SelfAdjointEigenSolver<Matrix<Scalar,Size,Size> > eigenSolver(_covar);
+	  SelfAdjointEigenSolver<Matrix<Scalar,Dynamic,Dynamic> > eigenSolver(_covar);
 	  _transform = eigenSolver.eigenvectors()*eigenSolver.eigenvalues().cwiseMax(0).cwiseSqrt().asDiagonal();
 	}
     }
 
     /// Draw nn samples from the gaussian and return them
-    /// as columns in a Size by nn matrix
-    Matrix<Scalar,Size,-1> samples(int nn)
+    /// as columns in a Dynamic by nn matrix
+    Matrix<Scalar,Dynamic,-1> samples(int nn)
       {
-	return (_transform * Matrix<Scalar,Size,-1>::NullaryExpr(Size,nn,randN)).colwise() + _mean;
+	return (_transform * Matrix<Scalar,Dynamic,-1>::NullaryExpr(_covar.rows(),nn,randN)).colwise() + _mean;
       }
   }; // end class EigenMultivariateNormal
 } // end namespace Eigen

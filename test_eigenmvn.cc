@@ -28,7 +28,8 @@ int main()
 
   // Create a bivariate gaussian distribution of doubles.
   // with our chosen mean and covariance
-  Eigen::EigenMultivariateNormal<double,2> normX_solver(mean,covar);
+  const int dim = 2;
+  Eigen::EigenMultivariateNormal<double> normX_solver(mean,covar);
   std::ofstream file_solver("samples_solver.txt");
 
   // Generate some samples and write them out to file
@@ -37,7 +38,7 @@ int main()
 
   // same for Cholesky decomposition.
   covar = genCovar(3,0.1,M_PI/5.0);
-  Eigen::EigenMultivariateNormal<double,2> normX_cholesk(mean,covar,true);
+  Eigen::EigenMultivariateNormal<double> normX_cholesk(mean,covar,true);
   std::ofstream file_cholesky("samples_cholesky.txt");
   file_cholesky << normX_cholesk.samples(5000).transpose() << std::endl;
 }

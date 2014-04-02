@@ -9,6 +9,8 @@ I have been unable to contact the original author, and I've performed the follow
  * ability to choose from Solver or Cholesky decomposition (supposedly faster);                                                                              
  * fixed Cholesky by using LLT decomposition instead of LDLT that was not yielding a correctly rotated variance. See this link for more details: http://stats.stackexchange.com/questions/48749/how-to-sample-from-a-multivariate-normal-given-the-pt-ldlt-p-decomposition-o
 
+ * turned matrix fixed sizes into dynamic sizes.
+ 
 #### Usage
 Compile the test exe with
 ```
