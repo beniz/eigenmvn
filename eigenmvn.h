@@ -55,6 +55,7 @@ namespace Eigen {
 
 	template<typename Index>
 	inline const Scalar operator() (Index, Index = 0) const { return norm(rng); }
+	inline void seed(const uint64_t &s) { rng.seed(s); }
       };
 
     template<typename Scalar>
@@ -78,12 +79,14 @@ namespace Eigen {
     Matrix< Scalar, Dynamic, 1> _mean;
     internal::scalar_normal_dist_op<Scalar> randN; // Gaussian functor
     bool _use_cholesky;
-
+    SelfAdjointEigenSolver<Matrix<Scalar,Dynamic,Dynamic> > _eigenSolver; // drawback: this creates a useless eigenSolver when using Cholesky decomposition, but it yields access to eigenvalues and vectors
+    
   public:
   EigenMultivariateNormal(const Matrix<Scalar,Dynamic,1>& mean,const Matrix<Scalar,Dynamic,Dynamic>& covar,
-			  const bool use_cholesky=false)
+			  const bool use_cholesky=false,const uint64_t &seed=std::mt19937::default_seed)
       :_use_cholesky(use_cholesky)
-      {
+     {
+        randN.seed(seed);
 	setMean(mean);
 	setCovar(covar);
       }
@@ -116,8 +119,8 @@ namespace Eigen {
 	}
       else
 	{
-	  SelfAdjointEigenSolver<Matrix<Scalar,Dynamic,Dynamic> > eigenSolver(_covar);
-	  _transform = eigenSolver.eigenvectors()*eigenSolver.eigenvalues().cwiseMax(0).cwiseSqrt().asDiagonal();
+	  _eigenSolver = SelfAdjointEigenSolver<Matrix<Scalar,Dynamic,Dynamic> >(_covar);
+	  _transform = _eigenSolver.eigenvectors()*_eigenSolver.eigenvalues().cwiseMax(0).cwiseSqrt().asDiagonal();
 	}
     }
 
