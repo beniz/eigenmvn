@@ -103,6 +103,7 @@ class MultivariateNormal {
     setCovar(covar);
   }
 
+  const Matrix<Scalar, Dynamic, Dynamic>& getCovar() const { return _covar; }
   static void setSeed(const uint64_t& seed) { decltype(randN)::seed(seed); }
   void setMean(const Matrix<Scalar, Dynamic, 1>& mean) { _mean = mean; }
   void setCovar(const Matrix<Scalar, Dynamic, Dynamic>& covar) {
